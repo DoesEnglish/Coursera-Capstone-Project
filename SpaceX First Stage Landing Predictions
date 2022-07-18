@@ -1,1 +1,113 @@
+#Importing necessary packages
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#Importing dataset and checking that it worked
+df=pd.read_csv("https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DS0321EN-SkillsNetwork/datasets/dataset_part_2.csv")
+df.head(5)
+
+#sns.catplot(y="PayloadMass", x="FlightNumber", hue="Class", data=df, aspect = 5)
+plt.xlabel("Flight Number",fontsize=20)
+plt.ylabel("Pay load Mass (kg)",fontsize=20)
+plt.show()
+
+#Trying to see how the FlightNumber and Payload variables would affect the launch outcome.
+sns.catplot(y="PayloadMass", x="FlightNumber", hue="Class", data=df, aspect = 5)
+plt.xlabel("Flight Number",fontsize=20)
+plt.ylabel("Pay load Mass (kg)",fontsize=20)
+plt.show()
+
+#Different launch sites have different success rates. CCAFS LC-40, has a success rate of 60 %, while KSC LC-39A and VAFB SLC 4E has a success rate of 77%.
+#Visualizing the relationship between Flight Number and Launch Site
+
+sns.catplot(y="LaunchSite", x="FlightNumber", hue="Class", data=df, aspect = 5)
+plt.xlabel("Flight Number",fontsize=20)
+plt.ylabel("Pay load Mass (kg)",fontsize=20)
+plt.show()
+
+#Visualizing the relationship between Payload and Launch Site
+sns.catplot( x="PayloadMass", y="LaunchSite", hue="Class", data=df, aspect = 5)
+plt.xlabel("Payload Mass", fontsize=20)
+plt.ylabel("Launch Site", fontsize=20)
+plt.show()
+
+#Visualizing the relationship between success rate of each orbit type
+orbit_success = df.groupby('Orbit').mean()
+orbit_success.reset_index(inplace=True)
+sns.barplot(x="Orbit", y="Class", data=orbit_success, hue='Class')
+
+#Visualizing the relationship between FlightNumber and Orbit type
+sns.catplot(x='FlightNumber', y='Orbit', data=df, hue='Class')
+plt.xlabel("Flight Number", fontsize=20)
+plt.ylabel("Orbit", fontsize=20)
+plt.show()
+#In the LEO orbit the Success appears related to the number of flights.
+#Seems to be no relationship between flight number when in GTO orbit.
+
+#Visualizing the relationship between Payload and Orbit type
+sns.catplot(x='PayloadMass', y='Orbit', data=df, hue='Class')
+plt.xlabel("Payload Mass", fontsize=20)
+plt.ylabel("Orbit", fontsize=20)
+plt.show()
+#With heavy payloads the successful landing or positive landing rate are more for Polar,LEO and ISS.
+#For GTO we can't distinguish this since both positive and negative landings are both present.
+
+#Visualizing the launch success yearly trend.
+year=[]
+def Extract_year(date):
+    for i in df["Date"]:
+        year.append(i.split("-")[0])
+    return year
+Extract_year(1)
+df["Year"]=year
+average_by_year = df.groupby(by="Year").mean()
+average_by_year.reset_index(inplace=True)
+plt.plot(average_by_year["Year"],average_by_year["Class"])
+plt.xlabel("Year")
+plt.ylabel("Success/Failure")
+plt.show()
+
+#Now to go ahead with feature engineering
+features = df[['FlightNumber', 'PayloadMass', 'Orbit', 'LaunchSite', 'Flights', 'GridFins', 'Reused', 'Legs', 'LandingPad', 'Block', 'ReusedCount', 'Serial']]
+features.head()
+
+#Creating dummy variables to categorical columns
+features_one_hot=pd.get_dummies(features, columns=['Orbit','LaunchSite', 'LandingPad', 'Serial'])
+features_one_hot
+
+#Casting all numeric columns to float64
+features_one_hot= features_one_hot.astype('float64')
+
+#Optionally we can export the post-fiddling data set
+features_one_hot.to_csv('dataset_part_3.csv', index=False)
+
+#End
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
